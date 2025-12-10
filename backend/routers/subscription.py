@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from .. import models, schemas, database
-from .auth import get_current_user
+import models, schemas, database
+from routers.auth import get_current_user
 
 router = APIRouter(
     prefix="/subscription",

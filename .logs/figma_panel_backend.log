@@ -1,0 +1,7 @@
+
+> figma-x6-editor-backend@1.0.0 dev
+> node --watch server.js
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+Mock backend server running at http://localhost:3002
+Default project ID: 5f3a1d65-9355-44b7-aa0f-cc6de8496428

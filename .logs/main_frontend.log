@@ -1,0 +1,28 @@
+
+> graphical-ide@1.0.0 dev
+> vite
+
+
+  VITE v4.5.14  ready in 98 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://192.168.1.101:5173/
+  ➜  Network: http://192.168.1.102:5173/
+  ➜  Network: http://198.18.0.1:5173/
+12:13:59 AM [vite] backend/.env changed, restarting server...
+12:13:59 AM [vite] server restarted.
+12:14:00 AM [vite] backend/.env changed, restarting server...
+12:14:00 AM [vite] server restarted.
+12:17:44 AM [vite] backend/.env changed, restarting server...
+12:17:44 AM [vite] server restarted.
+12:17:45 AM [vite] backend/.env changed, restarting server...
+12:17:45 AM [vite] server restarted.
+12:18:42 AM [vite] backend/.env changed, restarting server...
+12:18:42 AM [vite] server restarted.
+12:18:46 AM [vite] backend/.env changed, restarting server...
+12:18:46 AM [vite] server restarted.
+12:18:47 AM [vite] backend/.env changed, restarting server...
+12:18:47 AM [vite] server restarted.
+1:24:57 AM [vite] page reload src/panels/registry.js
+1:24:58 AM [vite] page reload src/panels/registry.js
+1:27:11 AM [vite] page reload index.html

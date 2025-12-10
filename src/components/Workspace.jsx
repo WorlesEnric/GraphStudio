@@ -98,7 +98,7 @@ export default function Workspace() {
         ) : (
           /* Panels Grid */
           <div className="h-full flex gap-4 overflow-hidden">
-            {visiblePanels.map((panel) => {
+            {visiblePanels.map((panel, index) => {
               // If another panel is fullscreen, hide this one
               if (activeFullscreenId && activeFullscreenId !== panel.id) {
                 return null;
@@ -116,12 +116,38 @@ export default function Workspace() {
               }
 
               return (
-                <PanelContainer
+                <div
                   key={panel.id}
-                  panel={panel}
-                  widthClass={widthClass}
-                  isFocused={focusedPanelId === panel.id}
-                />
+                  draggable={panel.mode !== 'fullscreen'}
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData('text/plain', panel.id);
+                    e.dataTransfer.effectAllowed = 'move';
+                    // Add a class to styling
+                    e.currentTarget.classList.add('opacity-50');
+                  }}
+                  onDragEnd={(e) => {
+                    e.currentTarget.classList.remove('opacity-50');
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const sourceId = e.dataTransfer.getData('text/plain');
+                    if (sourceId && sourceId !== panel.id) {
+                      const { reorderPanels } = useStudioStore.getState();
+                      reorderPanels(sourceId, panel.id);
+                    }
+                  }}
+                  className={`${widthClass} h-full transition-all duration-300`}
+                >
+                  <PanelContainer
+                    panel={panel}
+                    widthClass="w-full"
+                    isFocused={focusedPanelId === panel.id}
+                  />
+                </div>
               );
             })}
           </div>

@@ -29,11 +29,15 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password) => {
-        const formData = new FormData();
-        formData.append('username', email);
-        formData.append('password', password);
+        const params = new URLSearchParams();
+        params.append('username', email);
+        params.append('password', password);
 
-        const response = await client.post('/auth/token', formData);
+        const response = await client.post('/auth/token', params, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+        });
         localStorage.setItem('token', response.data.access_token);
         await fetchUser();
     };

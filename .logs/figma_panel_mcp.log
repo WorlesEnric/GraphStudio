@@ -1,0 +1,5 @@
+
+> figma-x6-editor-backend@1.0.0 mcp
+> node mcp-server.js
+
+Figma X6 Editor MCP Server running on stdio

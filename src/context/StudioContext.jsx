@@ -26,12 +26,21 @@ import { subscribeWithSelector } from 'zustand/middleware';
 const useStudioStore = create(
   subscribeWithSelector((set, get) => ({
     // === Panel Instances State ===
-    panels: [],
+    panels: [
+      {
+        id: 'builtin-chat',
+        panelTypeId: 'chat',
+        title: 'AI Assistant',
+        mode: 'flexible',
+        state: { messages: [] }, // Initial state will be merged/handled by component
+        order: 0,
+        isAIObserving: false,
+      }
+    ],
 
     // === UI State ===
     activeFullscreenId: null,
     focusedPanelId: null,
-    commandPaletteOpen: false,
     commandPaletteOpen: false,
     addPanelModalOpen: false,
     settingsModalOpen: false,
@@ -77,6 +86,13 @@ const useStudioStore = create(
     },
 
     removePanel: (id) => {
+      const panel = get().panels.find(p => p.id === id);
+      if (panel && panel.panelTypeId === 'chat') {
+        console.warn("Cannot remove built-in Chat Panel");
+        // Optionally flash a toast or alert
+        return;
+      }
+
       set((state) => ({
         panels: state.panels.filter(p => p.id !== id),
         focusedPanelId: state.focusedPanelId === id ? null : state.focusedPanelId,

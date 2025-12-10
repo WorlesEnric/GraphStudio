@@ -72,7 +72,7 @@ export default function PanelHeader({ panel, panelDef, isFocused }) {
   return (
     <div className={`
       flex items-center gap-2 px-4 py-3 
-      border-b transition-colors
+      border-b transition-colors cursor-grab active:cursor-grabbing
       ${isFocused ? 'border-white/10 bg-white/5' : 'border-white/5'}
     `}>
       {/* Panel Icon */}

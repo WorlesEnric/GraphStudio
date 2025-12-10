@@ -1,0 +1,73 @@
+INFO:     Will watch for changes in these directories: ['/Users/worlesenric/wkspace/Nexus/backend']
+INFO:     Uvicorn running on http://0.0.0.0:3001 (Press CTRL+C to quit)
+INFO:     Started reloader process [46367] using StatReload
+2025-12-11 00:12:09,727 - main - INFO - Database routers loaded
+INFO:     Started server process [46372]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:53085 - "OPTIONS /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53086 - "OPTIONS /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53085 - "GET /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53086 - "GET /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53086 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53085 - "GET /ai/config HTTP/1.1" 200 OK
+2025-12-11 00:12:47,788 - services.ai_service - INFO - AIService initialized with provider=siliconflow, model=gpt-4o-mini
+INFO:     127.0.0.1:53229 - "POST /ai/chat/completions HTTP/1.1" 200 OK
+2025-12-11 00:12:47,985 - httpx - INFO - HTTP Request: POST https://api.siliconflow.cn/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2025-12-11 00:12:47,986 - routers.ai - ERROR - Stream generation error: Client error '400 Bad Request' for url 'https://api.siliconflow.cn/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+INFO:     127.0.0.1:53688 - "GET /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53688 - "GET /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53688 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53690 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53783 - "OPTIONS /ai/chat/completions HTTP/1.1" 200 OK
+2025-12-11 00:14:26,819 - services.ai_service - INFO - AIService initialized with provider=siliconflow, model=gpt-4o-mini
+INFO:     127.0.0.1:53783 - "POST /ai/chat/completions HTTP/1.1" 200 OK
+2025-12-11 00:14:26,991 - httpx - INFO - HTTP Request: POST https://api.siliconflow.cn/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2025-12-11 00:14:26,992 - routers.ai - ERROR - Stream generation error: Client error '400 Bad Request' for url 'https://api.siliconflow.cn/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+INFO:     127.0.0.1:55954 - "GET /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55954 - "GET /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55954 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55956 - "GET /ai/config HTTP/1.1" 200 OK
+2025-12-11 00:19:35,255 - services.ai_service - INFO - AIService initialized with provider=siliconflow, model=gpt-4o-mini
+INFO:     127.0.0.1:56163 - "POST /ai/chat/completions HTTP/1.1" 200 OK
+2025-12-11 00:19:35,415 - httpx - INFO - HTTP Request: POST https://api.siliconflow.cn/v1/chat/completions "HTTP/1.1 400 Bad Request"
+2025-12-11 00:19:35,415 - routers.ai - ERROR - Stream generation error: Client error '400 Bad Request' for url 'https://api.siliconflow.cn/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+INFO:     127.0.0.1:59117 - "OPTIONS /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59119 - "OPTIONS /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59117 - "GET /auth/me HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:59119 - "GET /auth/me HTTP/1.1" 401 Unauthorized
+2025-12-11 01:25:05,305 - routers.auth - INFO - Login attempt for email: worlesenric@gmail.com
+2025-12-11 01:25:05,309 - routers.auth - INFO - User found: worlesenric@gmail.com, checking password...
+2025-12-11 01:25:05,310 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/worlesenric/anaconda3/lib/python3.13/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-12-11 01:25:05,526 - routers.auth - INFO - Password verification result: True
+2025-12-11 01:25:05,526 - routers.auth - INFO - Login successful for user: worlesenric@gmail.com
+INFO:     127.0.0.1:59148 - "POST /auth/token HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59148 - "GET /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59148 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59148 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59405 - "GET /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59405 - "GET /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59405 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59407 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60382 - "OPTIONS /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60383 - "OPTIONS /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60382 - "GET /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60383 - "GET /auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60383 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60382 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60448 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60448 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60450 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60450 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60689 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60689 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60799 - "GET /ai/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60799 - "GET /ai/config HTTP/1.1" 200 OK

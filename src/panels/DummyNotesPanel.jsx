@@ -13,8 +13,8 @@ function NoteItem({ note, isSelected, onSelect, onDelete }) {
       onClick={onSelect}
       className={`
         group flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all
-        ${isSelected 
-          ? 'bg-amber-500/10 border border-amber-500/30' 
+        ${isSelected
+          ? 'bg-amber-500/10 border border-amber-500/30'
           : 'hover:bg-white/5 border border-transparent'
         }
       `}
@@ -22,7 +22,7 @@ function NoteItem({ note, isSelected, onSelect, onDelete }) {
       <div className="p-2 rounded-lg bg-amber-500/10">
         <File size={14} className="text-amber-500" />
       </div>
-      
+
       <div className="flex-1 min-w-0">
         <h4 className={`text-sm font-medium truncate ${isSelected ? 'text-amber-400' : 'text-zinc-200'}`}>
           {note.title}
@@ -36,7 +36,7 @@ function NoteItem({ note, isSelected, onSelect, onDelete }) {
           {note.starred && <Star size={10} className="text-amber-500 fill-amber-500" />}
         </div>
       </div>
-      
+
       <button
         onClick={(e) => { e.stopPropagation(); onDelete(); }}
         className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
@@ -57,14 +57,14 @@ function NotesMainView({ panelState, updateState, isFocused }) {
   const [selectedId, setSelectedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingContent, setEditingContent] = useState('');
-  
+
   const selectedNote = notes.find(n => n.id === selectedId);
-  
-  const filteredNotes = notes.filter(note => 
+
+  const filteredNotes = notes.filter(note =>
     note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     note.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  
+
   const addNote = () => {
     const newNote = {
       id: `note-${Date.now()}`,
@@ -79,7 +79,7 @@ function NotesMainView({ panelState, updateState, isFocused }) {
     setEditingContent('');
     updateState?.({ notes: updated });
   };
-  
+
   const deleteNote = (id) => {
     const updated = notes.filter(n => n.id !== id);
     setNotes(updated);
@@ -89,22 +89,22 @@ function NotesMainView({ panelState, updateState, isFocused }) {
     }
     updateState?.({ notes: updated });
   };
-  
+
   const updateNote = (id, changes) => {
-    const updated = notes.map(n => 
+    const updated = notes.map(n =>
       n.id === id ? { ...n, ...changes, updatedAt: Date.now() } : n
     );
     setNotes(updated);
     updateState?.({ notes: updated });
   };
-  
+
   const handleContentChange = (content) => {
     setEditingContent(content);
     if (selectedId) {
       updateNote(selectedId, { content });
     }
   };
-  
+
   const handleTitleChange = (title) => {
     if (selectedId) {
       updateNote(selectedId, { title });
@@ -128,7 +128,7 @@ function NotesMainView({ panelState, updateState, isFocused }) {
             />
           </div>
         </div>
-        
+
         {/* Add button */}
         <div className="px-3 pb-2">
           <button
@@ -139,7 +139,7 @@ function NotesMainView({ panelState, updateState, isFocused }) {
             New Note
           </button>
         </div>
-        
+
         {/* Notes list */}
         <div className="flex-1 overflow-y-auto px-2 space-y-1 pb-4">
           {filteredNotes.map(note => (
@@ -154,7 +154,7 @@ function NotesMainView({ panelState, updateState, isFocused }) {
               onDelete={() => deleteNote(note.id)}
             />
           ))}
-          
+
           {filteredNotes.length === 0 && (
             <div className="text-center py-8 text-zinc-500">
               <FileText size={32} className="mx-auto mb-2 opacity-30" />
@@ -163,7 +163,7 @@ function NotesMainView({ panelState, updateState, isFocused }) {
           )}
         </div>
       </div>
-      
+
       {/* Note editor */}
       <div className="flex-1 flex flex-col">
         {selectedNote ? (
@@ -191,7 +191,7 @@ function NotesMainView({ panelState, updateState, isFocused }) {
                 </button>
               </div>
             </div>
-            
+
             {/* Note content */}
             <textarea
               value={editingContent}
@@ -219,16 +219,16 @@ const DummyNotesPanel = createPanelDefinition({
   icon: FileText,
   category: PanelCategories.DATA,
   accentColor: 'amber',
-  
+
   renderMainView: (props) => <NotesMainView {...props} />,
-  
+
   getInitialState: () => ({
     notes: [
       { id: '1', title: 'Project Requirements', content: 'Build an AI-powered graphical IDE that supports flowcharts, Kanban boards, and more...', starred: true, updatedAt: Date.now() },
       { id: '2', title: 'Design Inspiration', content: 'Look at NotebookLM for panel layout ideas. Consider glass morphism effects...', starred: false, updatedAt: Date.now() - 86400000 },
     ],
   }),
-  
+
   getLLMContext: async (panelState) => {
     const notes = panelState?.notes || [];
     return {
@@ -241,7 +241,37 @@ const DummyNotesPanel = createPanelDefinition({
       schemaVersion: '1.0',
     };
   },
-  
+
+  getMCPTools: async () => [
+    {
+      name: 'create_note',
+      description: 'Creates a new note with title and content',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          title: { type: 'string', description: 'Title of the note' },
+          content: { type: 'string', description: 'Body code/text of the note' }
+        },
+        required: ['title']
+      }
+    }
+  ],
+
+  executeMCPTool: async (name, args, panelState, updateState) => {
+    if (name === 'create_note') {
+      const notes = [...(panelState?.notes || []), {
+        id: `note-${Date.now()}`,
+        title: args.title || 'Untitled',
+        content: args.content || '',
+        starred: false,
+        updatedAt: Date.now(),
+      }];
+      updateState({ notes });
+      return { success: true, message: `Created note: ${args.title}` };
+    }
+    throw new Error(`Unknown tool: ${name}`);
+  },
+
   applyLLMChange: async (panelState, updateState, dslDiff) => {
     if (dslDiff.addNote) {
       const notes = [...(panelState?.notes || []), {
@@ -254,19 +284,19 @@ const DummyNotesPanel = createPanelDefinition({
     }
     return false;
   },
-  
+
   dropZone: {
     acceptTypes: [ContentTypes.TEXT_PLAIN, ContentTypes.TEXT_MARKDOWN, ContentTypes.JSON],
     onDrop: (data, panelState, updateState) => {
       console.log('Notes received drop:', data);
     },
   },
-  
+
   exportFormats: [
     { format: 'md', label: 'Markdown', mimeType: 'text/markdown' },
     { format: 'json', label: 'JSON', mimeType: 'application/json' },
   ],
-  
+
   actions: [
     { id: 'notes.new', label: 'Create New Note', category: 'Notes' },
     { id: 'notes.search', label: 'Search Notes', category: 'Notes' },
