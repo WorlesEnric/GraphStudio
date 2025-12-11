@@ -1,12 +1,19 @@
 """
-Nexus Backend - FastAPI Application
-Main entry point for the backend server.
+Nexus Backend - Transaction Manager
+Service Layer: Handles API, Auth, and State.
 """
+import sys
+import os
+
+# Ensure shared packages are in path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../packages')))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 import logging
-import os
+from nexus_core import NexusService
+from config import get_settings
 
 # Configure logging
 logging.basicConfig(
@@ -17,16 +24,32 @@ logger = logging.getLogger(__name__)
 
 # Import routers
 from routers import ai
-from config import get_settings
 
 # Get settings
 settings = get_settings()
 
+class TransactionManagerService(NexusService):
+    def __init__(self):
+        super().__init__("transaction_manager", prometheus_port=8002)
+
+transaction_manager = TransactionManagerService()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    logger.info("Starting Transaction Manager...")
+    await transaction_manager.connect() # No consumer topics by default
+    yield
+    # Shutdown
+    logger.info("Stopping Transaction Manager...")
+    await transaction_manager.close()
+
 # Create FastAPI app
 app = FastAPI(
-    title="Nexus Backend",
-    description="Backend API for Nexus GraphStudio IDE",
-    version="1.0.0",
+    title="Nexus Backend (Transaction Manager)",
+    description="Service Layer API for Nexus GraphStudio",
+    version="2.1.0",
+    lifespan=lifespan
 )
 
 # Configure CORS
@@ -60,16 +83,16 @@ except Exception as e:
 def read_root():
     """Root endpoint."""
     return {
-        "message": "Welcome to Nexus API",
+        "message": "Nexus Transaction Manager Ready",
         "docs": "/docs",
-        "health": "/ai/health",
+        "layer": "Service (Transactional)"
     }
 
 
 @app.get("/health")
 def health_check():
     """Global health check endpoint."""
-    return {"status": "healthy", "service": "nexus-backend"}
+    return {"status": "healthy", "service": "transaction_manager", "connected": transaction_manager.running}
 
 
 if __name__ == "__main__":
