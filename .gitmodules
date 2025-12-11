@@ -1,3 +1,9 @@
 [submodule "src/panels/figma-x6-editor"]
 	path = src/panels/figma-x6-editor
 	url = https://github.com/WorlesEnric/figma-x6-editor.git
+[submodule "src/panels/ChatPanel"]
+	path = src/panels/ChatPanel
+	url = https://github.com/WorlesEnric/ChatPanel.git
+[submodule "src/panels/WorkspacePanel"]
+	path = src/panels/WorkspacePanel
+	url = https://github.com/WorlesEnric/WorkspacePanel.git
