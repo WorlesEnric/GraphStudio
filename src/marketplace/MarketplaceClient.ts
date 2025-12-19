@@ -192,11 +192,35 @@ export class MarketplaceClient {
    * Get panel details by ID
    */
   async getPanel(id: string): Promise<Panel> {
-    const response = await fetch(`${this.baseUrl}/panels/${id}`, {
-      headers: this.createHeaders(true),
+    console.log('[MarketplaceClient.getPanel] Starting fetch for panel:', id);
+    console.log('[MarketplaceClient.getPanel] URL:', `${this.baseUrl}/panels/${id}`);
+
+    const headers = this.createHeaders(true);
+    console.log('[MarketplaceClient.getPanel] Headers:', {
+      hasAuth: headers.Authorization ? 'Yes (Bearer token present)' : 'No',
+      contentType: headers['Content-Type']
     });
-    const data = await this.handleResponse<{ panel: Panel }>(response);
-    return data.panel;
+
+    const response = await fetch(`${this.baseUrl}/panels/${id}`, {
+      headers: headers,
+    });
+
+    console.log('[MarketplaceClient.getPanel] Response status:', response.status);
+    console.log('[MarketplaceClient.getPanel] Response ok:', response.ok);
+
+    // Backend returns panel directly, not wrapped
+    const data = await this.handleResponse<Panel>(response);
+
+    console.log('[MarketplaceClient.getPanel] Data received:', {
+      hasData: !!data,
+      dataType: typeof data,
+      hasName: data && 'name' in data,
+      name: data?.name,
+      hasNxmlSource: data && 'nxmlSource' in data,
+      nxmlLength: data?.nxmlSource?.length
+    });
+
+    return data;
   }
 
   /**

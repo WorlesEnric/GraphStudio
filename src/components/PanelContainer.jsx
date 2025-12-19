@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import useStudioStore from '../context/StudioContext';
 import { useWorkspace } from '../context/WorkspaceContext';
+import { useNexusClient } from '../context/NexusContext';
 import { getPanelDefinition } from '../panels/registry';
 import { useDropTarget } from '../hooks/useDragDrop';
 import PanelHeader from './PanelHeader';
@@ -22,6 +23,10 @@ export default function PanelContainer({ panel, widthClass, isFocused }) {
     updatePanelMode,
     updatePanelId,
   } = useStudioStore();
+
+  // Get NexusClient to access baseUrl
+  const nexusClient = useNexusClient();
+  const workspaceKernelUrl = nexusClient.getBaseUrl();
 
   // Get panel definition
   let panelDef = getPanelDefinition(panel.panelTypeId);
@@ -135,8 +140,8 @@ export default function PanelContainer({ panel, widthClass, isFocused }) {
           <NXMLRenderer
             panelId={panel.id}
             workspaceId={workspaceId}
-            apiBaseUrl="http://localhost:8000"
-            wsUrl="ws://localhost:8000"
+            apiBaseUrl={workspaceKernelUrl}
+            wsUrl={workspaceKernelUrl.replace('http://', 'ws://').replace('https://', 'wss://')}
             token={authToken}
             onStateChange={handleStateChange}
           />

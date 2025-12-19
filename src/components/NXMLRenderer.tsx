@@ -154,7 +154,7 @@ function TextComponent({ children, size = '1rem', color, weight, ...props }: any
   );
 }
 
-function ButtonComponent({ label, onClick, disabled, variant = 'primary', ...props }: any) {
+function ButtonComponent({ label, onClick, disabled, variant = 'primary', children, className, ...props }: any) {
   const baseStyle: React.CSSProperties = {
     padding: '0.5rem 1rem',
     borderRadius: '0.375rem',
@@ -187,29 +187,48 @@ function ButtonComponent({ label, onClick, disabled, variant = 'primary', ...pro
       style={{ ...baseStyle, ...variantStyles[variant], ...props.style }}
       onClick={onClick}
       disabled={disabled}
+      className={className}
       {...props}
     >
-      {label || children}
+      {children || label}
     </button>
   );
 }
 
-function InputComponent({ value, onChange, placeholder, type = 'text', ...props }: any) {
+function InputComponent({ value, onChange, placeholder, type = 'text', multiline, rows = 3, className, ...props }: any) {
+  const inputStyle = {
+    padding: '0.5rem',
+    borderRadius: '0.375rem',
+    border: '1px solid #374151',
+    backgroundColor: '#1f2937',
+    color: '#ffffff',
+    fontSize: '0.875rem',
+    width: '100%',
+    ...props.style,
+  };
+
+  if (multiline === 'true' || multiline === true) {
+    return (
+      <textarea
+        value={value || ''}
+        onChange={(e) => onChange?.(e.target.value)}
+        placeholder={placeholder}
+        rows={rows}
+        className={className}
+        style={inputStyle}
+        {...props}
+      />
+    );
+  }
+
   return (
     <input
       type={type}
-      value={value}
+      value={value || ''}
       onChange={(e) => onChange?.(e.target.value)}
       placeholder={placeholder}
-      style={{
-        padding: '0.5rem',
-        borderRadius: '0.375rem',
-        border: '1px solid #374151',
-        backgroundColor: '#1f2937',
-        color: '#ffffff',
-        fontSize: '0.875rem',
-        ...props.style,
-      }}
+      className={className}
+      style={inputStyle}
       {...props}
     />
   );
@@ -253,8 +272,8 @@ function ListItemComponent({ children, ...props }: any) {
 export function NXMLRenderer({
   panelId,
   workspaceId,
-  apiBaseUrl = 'http://localhost:8000',
-  wsUrl = 'ws://localhost:8000',
+  apiBaseUrl = 'http://localhost:30091',
+  wsUrl = 'ws://localhost:30091',
   token,
   onStateChange,
   onError,
@@ -433,6 +452,17 @@ export function NXMLRenderer({
   );
 
   /**
+   * Call a tool by name
+   */
+  const callTool = useCallback(
+    async (toolName: string, args: Record<string, any> = {}) => {
+      console.log(`[NXMLRenderer] Calling tool: ${toolName}`, args);
+      return executeHandler(toolName, args);
+    },
+    [executeHandler]
+  );
+
+  /**
    * Resolve prop value (handle bindings like {$state.count})
    */
   const resolvePropValue = useCallback(
@@ -456,6 +486,40 @@ export function NXMLRenderer({
    */
   const renderNode = useCallback(
     (node: ViewNode, index: number = 0): React.ReactNode => {
+      // Handle control flow components
+      if (node.type === 'If') {
+        const condition = node.props?.condition;
+        if (condition) {
+          const result = resolvePropValue(condition);
+          if (result) {
+            return node.children?.map((child, idx) => renderNode(child, idx)) || null;
+          }
+        }
+        return null;
+      }
+
+      if (node.type === 'Iterate') {
+        const over = node.props?.over;
+        const as = node.props?.as || 'item';
+
+        if (over) {
+          const items = resolvePropValue(over);
+          if (Array.isArray(items)) {
+            return items.map((item, itemIndex) => {
+              // Create a new scope with the iteration variable
+              // Note: This is a simplified implementation
+              // A full implementation would need proper scope management
+              return (
+                <React.Fragment key={itemIndex}>
+                  {node.children?.map((child, idx) => renderNode(child, idx))}
+                </React.Fragment>
+              );
+            });
+          }
+        }
+        return null;
+      }
+
       const Component = COMPONENT_MAP[node.type];
 
       if (!Component) {
@@ -468,8 +532,25 @@ export function NXMLRenderer({
 
       if (node.props) {
         for (const [key, value] of Object.entries(node.props)) {
+          // Handle bind prop for Input components
+          if (key === 'bind' && typeof value === 'string' && value.startsWith('$state.')) {
+            const varName = value.replace('$state.', '');
+            resolvedProps.value = state[varName];
+            resolvedProps.onChange = (newValue: any) => {
+              setState((prev) => ({ ...prev, [varName]: newValue }));
+            };
+          }
+          // Handle trigger prop for Button components (call tool)
+          else if (key === 'trigger' && typeof value === 'string') {
+            const toolName = value;
+            const argsExpr = node.props?.args;
+            resolvedProps.onClick = () => {
+              const args = argsExpr ? resolvePropValue(argsExpr) : {};
+              callTool(toolName, args);
+            };
+          }
           // Handle event handlers
-          if (key.startsWith('on') && typeof value === 'string') {
+          else if (key.startsWith('on') && typeof value === 'string') {
             resolvedProps[key] = () => executeHandler(value);
           } else {
             // Resolve bindings
@@ -479,7 +560,7 @@ export function NXMLRenderer({
       }
 
       // Render children
-      const children = node.children?.map((child, idx) => renderNode(child, idx));
+      const children = node.children?.map((child, idx) => renderNode(child, idx)) || null;
 
       return (
         <Component key={index} {...resolvedProps}>
@@ -487,7 +568,7 @@ export function NXMLRenderer({
         </Component>
       );
     },
-    [resolvePropValue, executeHandler]
+    [resolvePropValue, executeHandler, callTool, state, setState]
   );
 
   /**
@@ -568,7 +649,7 @@ export function useNXMLPanel(
     initialState?: Record<string, any>;
   } = {}
 ) {
-  const { apiBaseUrl = 'http://localhost:8000', token, initialState } = options;
+  const { apiBaseUrl = 'http://localhost:30091', token, initialState } = options;
 
   const [panelId, setPanelId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);

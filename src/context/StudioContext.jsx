@@ -278,24 +278,49 @@ const useStudioStore = create(
     },
 
     addPanelToWorkspace: async (panelId) => {
+      console.log('[StudioContext.addPanelToWorkspace] Starting for panelId:', panelId);
+
       const marketplaceClient = getMarketplaceClient();
       const nexusClient = getNexusClient();
 
+      console.log('[StudioContext.addPanelToWorkspace] Clients initialized');
+
       try {
         // Get panel details from marketplace
+        console.log('[StudioContext.addPanelToWorkspace] Fetching panel details from marketplace...');
         const panel = await marketplaceClient.getPanel(panelId);
 
+        console.log('[StudioContext.addPanelToWorkspace] Panel received:', {
+          hasPanel: !!panel,
+          panelType: typeof panel,
+          panelId: panel?.id,
+          name: panel?.name,
+          hasNxmlSource: !!panel?.nxmlSource,
+          nxmlSourceLength: panel?.nxmlSource?.length
+        });
+
         if (!panel) {
+          console.error('[StudioContext.addPanelToWorkspace] Panel is null/undefined');
           throw new Error('Panel not found');
         }
 
         // Create runtime panel instance via workspace-kernel from NXML
+        console.log('[StudioContext.addPanelToWorkspace] Creating runtime panel instance...');
+        console.log('[StudioContext.addPanelToWorkspace] NXML source length:', panel.nxmlSource?.length);
+
         const response = await nexusClient.createPanelFromNXML(panel.nxmlSource, {});
+
+        console.log('[StudioContext.addPanelToWorkspace] Runtime panel created:', {
+          runtimeId: response?.id,
+          status: response?.status
+        });
 
         const runtimeId = response.id;
 
         // Add to active panels in workspace
         const panels = get().panels;
+        console.log('[StudioContext.addPanelToWorkspace] Adding to workspace, current panel count:', panels.length);
+
         set({
           panels: [
             ...panels,
@@ -320,9 +345,14 @@ const useStudioStore = create(
           ],
         });
 
+        console.log('[StudioContext.addPanelToWorkspace] Success! Runtime ID:', runtimeId);
         return runtimeId;
       } catch (error) {
-        console.error('[StudioContext] Failed to add panel to workspace:', error);
+        console.error('[StudioContext.addPanelToWorkspace] Error occurred:', {
+          error: error,
+          message: error.message,
+          stack: error.stack
+        });
         throw error;
       }
     },

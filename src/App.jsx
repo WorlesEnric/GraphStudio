@@ -26,7 +26,7 @@ const ProtectedRoute = ({ children }) => {
  */
 function App() {
   // Get workspace-kernel URL from environment variable
-  const workspaceKernelUrl = import.meta.env.VITE_WORKSPACE_KERNEL_URL || 'http://localhost:8000';
+  const workspaceKernelUrl = import.meta.env.VITE_WORKSPACE_KERNEL_URL || 'http://localhost:30091';
 
   return (
     <BrowserRouter>

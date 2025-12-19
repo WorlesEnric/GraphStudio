@@ -69,8 +69,21 @@ export class NexusClient {
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
 
-  constructor(baseUrl: string = 'http://localhost:3000') {
-    this.baseUrl = baseUrl;
+  constructor(baseUrl?: string) {
+    // Use workspace-kernel URL from env or default to port 30091
+    const defaultUrl = import.meta.env.VITE_WS_URL
+      ? import.meta.env.VITE_WS_URL.replace('ws://', 'http://')
+      : 'http://localhost:30091';
+
+    this.baseUrl = baseUrl || defaultUrl;
+    console.log('[NexusClient] Initialized with baseUrl:', this.baseUrl);
+  }
+
+  /**
+   * Get the base URL for the workspace-kernel
+   */
+  getBaseUrl(): string {
+    return this.baseUrl;
   }
 
   /**
@@ -122,18 +135,41 @@ export class NexusClient {
    * Create a new panel runtime instance from NXML source
    */
   async createPanelFromNXML(nxmlSource: string, initialState?: Record<string, any>): Promise<CreatePanelResponse> {
-    const response = await fetch(`${this.baseUrl}/panels/from-nxml`, {
+    const url = `${this.baseUrl}/api/panels/from-nxml`;
+    console.log('[NexusClient.createPanelFromNXML] Starting request');
+    console.log('[NexusClient.createPanelFromNXML] URL:', url);
+    console.log('[NexusClient.createPanelFromNXML] NXML length:', nxmlSource?.length);
+    console.log('[NexusClient.createPanelFromNXML] Has initialState:', !!initialState);
+
+    const headers = this.createHeaders();
+    console.log('[NexusClient.createPanelFromNXML] Headers:', {
+      hasAuth: headers.Authorization ? 'Yes (Bearer token present)' : 'No',
+      contentType: headers['Content-Type']
+    });
+
+    const response = await fetch(url, {
       method: 'POST',
-      headers: this.createHeaders(),
+      headers: headers,
       body: JSON.stringify({ nxmlSource, initialState }),
     });
 
+    console.log('[NexusClient.createPanelFromNXML] Response status:', response.status);
+    console.log('[NexusClient.createPanelFromNXML] Response ok:', response.ok);
+
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.json().catch(() => ({ error: response.statusText }));
+      console.error('[NexusClient.createPanelFromNXML] Error response:', error);
       throw new Error(`Failed to create panel from NXML: ${error.error || error.message || response.statusText}`);
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log('[NexusClient.createPanelFromNXML] Success! Panel created:', {
+      id: data.id,
+      status: data.status,
+      wsUrl: data.wsUrl
+    });
+
+    return data;
   }
 
   /**
