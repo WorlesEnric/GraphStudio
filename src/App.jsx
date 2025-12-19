@@ -31,16 +31,16 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <WorkspaceProvider>
-          <NexusProvider baseUrl={workspaceKernelUrl}>
+        <NexusProvider baseUrl={workspaceKernelUrl}>
+          <WorkspaceProvider>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/pricing" element={<ProtectedRoute><PricingPage /></ProtectedRoute>} />
               <Route path="/" element={<ProtectedRoute><Shell /></ProtectedRoute>} />
             </Routes>
-          </NexusProvider>
-        </WorkspaceProvider>
+          </WorkspaceProvider>
+        </NexusProvider>
       </AuthProvider>
     </BrowserRouter>
   );

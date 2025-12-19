@@ -10,6 +10,7 @@ import SettingsModal from './SettingsModal';
 import HelpModal from './HelpModal';
 import NOGViewer from './NOGViewer';
 import { PublishPanelModal } from './PublishPanelModal';
+import WorkspaceSelectorModal from './WorkspaceSelectorModal';
 
 import Background from './Background';
 
@@ -26,7 +27,7 @@ export default function Shell() {
   // Initialize keyboard shortcuts
   useKeyboardShortcuts();
 
-  const { currentWorkspace } = useWorkspace();
+  const { currentWorkspace, switchWorkspace } = useWorkspace();
 
   const {
     commandPaletteOpen,
@@ -35,6 +36,8 @@ export default function Shell() {
     helpModalOpen,
     nogViewerOpen,
     publishPanelModalOpen,
+    workspaceSelectorModalOpen,
+    closeWorkspaceSelectorModal,
     loadAvailablePanels,
     loadInstalledPanels,
   } = useStudioStore();
@@ -88,6 +91,17 @@ export default function Shell() {
             console.log('[Shell] Panel published:', panelId);
             useStudioStore.getState().closePublishPanelModal();
             useStudioStore.getState().loadAvailablePanels();
+          }}
+        />
+      )}
+
+      {/* Workspace Selector Modal */}
+      {workspaceSelectorModalOpen && (
+        <WorkspaceSelectorModal
+          onClose={closeWorkspaceSelectorModal}
+          onSelect={async (workspaceId) => {
+            await switchWorkspace(workspaceId);
+            closeWorkspaceSelectorModal();
           }}
         />
       )}

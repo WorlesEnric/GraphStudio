@@ -39,7 +39,7 @@ export default function CreateWorkspaceModal({ onClose, onSuccess }: CreateWorks
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+        className="fixed inset-0 bg-black/20 backdrop-blur-[1px] z-[60] flex items-center justify-center p-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -81,7 +81,7 @@ export default function CreateWorkspaceModal({ onClose, onSuccess }: CreateWorks
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="My Awesome Workspace"
-                className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all placeholder-gray-500"
+                className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-white focus:ring-2 focus:ring-white/20 focus:outline-none transition-all placeholder-gray-500"
                 autoFocus
                 maxLength={100}
               />
@@ -131,7 +131,7 @@ export default function CreateWorkspaceModal({ onClose, onSuccess }: CreateWorks
               <button
                 type="submit"
                 disabled={isCreating || !name.trim()}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-all shadow-lg hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
+                className="flex-1 px-4 py-3 bg-white text-black hover:bg-gray-200 rounded-lg font-medium transition-all shadow-lg hover:shadow-white/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
               >
                 {isCreating ? (
                   <span className="flex items-center justify-center gap-2">

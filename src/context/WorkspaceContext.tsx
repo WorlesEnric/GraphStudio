@@ -22,7 +22,8 @@ interface WorkspaceContextType {
   loadWorkspaces: () => Promise<void>;
   openWorkspace: (workspaceId: string) => Promise<void>;
   createWorkspace: (name: string, description?: string) => Promise<Workspace>;
-  closeWorkspace: () => void;
+  closeWorkspace: () => Promise<void>;
+  switchWorkspace: (newWorkspaceId: string) => Promise<void>;
   deleteWorkspace: (workspaceId: string) => Promise<void>;
   renameWorkspace: (workspaceId: string, newName: string) => Promise<void>;
 }
@@ -116,9 +117,57 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
     }
   };
 
-  const closeWorkspace = () => {
+  const closeWorkspace = async () => {
+    if (currentWorkspace && nexusClient) {
+      try {
+        // Deactivate workspace in backend
+        await nexusClient.deactivateWorkspace(currentWorkspace.id);
+      } catch (err: any) {
+        console.error('Failed to deactivate workspace:', err);
+        // Continue anyway to avoid stuck state
+      }
+    }
     setCurrentWorkspace(null);
     localStorage.removeItem('lastOpenedWorkspace');
+  };
+
+  const switchWorkspace = async (newWorkspaceId: string) => {
+    if (!nexusClient) return;
+
+    // If no workspace is open, just open the new one
+    if (!currentWorkspace) {
+      await openWorkspace(newWorkspaceId);
+      return;
+    }
+
+    // Don't switch if it's the same workspace
+    if (currentWorkspace.id === newWorkspaceId) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Step 1: Deactivate current workspace
+      try {
+        await nexusClient.deactivateWorkspace(currentWorkspace.id);
+      } catch (err: any) {
+        console.error('Failed to deactivate workspace:', err);
+        // Continue anyway to avoid stuck state
+      }
+
+      // Step 2: Clear frontend state
+      setCurrentWorkspace(null);
+
+      // Step 3: Open new workspace
+      await openWorkspace(newWorkspaceId);
+    } catch (err: any) {
+      setError(err.message || 'Failed to switch workspace');
+      console.error('Failed to switch workspace:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const deleteWorkspace = async (workspaceId: string) => {
@@ -172,6 +221,7 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
         openWorkspace,
         createWorkspace,
         closeWorkspace,
+        switchWorkspace,
         deleteWorkspace,
         renameWorkspace,
       }}

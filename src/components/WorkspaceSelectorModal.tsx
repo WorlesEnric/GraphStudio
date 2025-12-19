@@ -5,26 +5,32 @@ import CreateWorkspaceModal from './CreateWorkspaceModal';
 
 interface WorkspaceSelectorModalProps {
   onClose: () => void;
+  onSelect?: (workspaceId: string) => Promise<void>;
 }
 
-export default function WorkspaceSelectorModal({ onClose }: WorkspaceSelectorModalProps) {
+export default function WorkspaceSelectorModal({ onClose, onSelect }: WorkspaceSelectorModalProps) {
   const { workspaceList, isLoading, openWorkspace } = useWorkspace();
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const handleSelectWorkspace = async (workspaceId: string) => {
     try {
-      await openWorkspace(workspaceId);
-      onClose(); // Close modal after successful open
+      // Use custom onSelect if provided, otherwise use default openWorkspace
+      if (onSelect) {
+        await onSelect(workspaceId);
+      } else {
+        await openWorkspace(workspaceId);
+        onClose(); // Close modal after successful open
+      }
     } catch (err) {
-      console.error('Failed to open workspace:', err);
-      alert('Failed to open workspace. Please try again.');
+      console.error('Failed to open/switch workspace:', err);
+      alert('Failed to open/switch workspace. Please try again.');
     }
   };
 
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-black/20 backdrop-blur-[1px] z-50 flex items-center justify-center p-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -57,7 +63,7 @@ export default function WorkspaceSelectorModal({ onClose }: WorkspaceSelectorMod
           <div className="p-6 overflow-y-auto max-h-[500px]">
             {isLoading ? (
               <div className="text-center py-12">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
                 <p className="text-gray-400 mt-4">Loading workspaces...</p>
               </div>
             ) : workspaceList.length === 0 ? (
@@ -74,20 +80,20 @@ export default function WorkspaceSelectorModal({ onClose }: WorkspaceSelectorMod
                   <motion.button
                     key={workspace.id}
                     onClick={() => handleSelectWorkspace(workspace.id)}
-                    className="w-full flex items-center gap-4 p-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-all duration-200 text-left group border border-transparent hover:border-blue-500/50"
+                    className="w-full flex items-center gap-4 p-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-all duration-200 text-left group border border-transparent hover:border-white/30"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
                     {/* Workspace Icon */}
                     <div className="flex-shrink-0">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:shadow-blue-500/50 transition-shadow">
+                      <div className="w-12 h-12 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:shadow-white/10 transition-shadow">
                         {workspace.name.charAt(0).toUpperCase()}
                       </div>
                     </div>
 
                     {/* Workspace Info */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-white truncate group-hover:text-blue-400 transition-colors">
+                      <h3 className="text-lg font-semibold text-white truncate group-hover:text-gray-300 transition-colors">
                         {workspace.name}
                       </h3>
                       {workspace.description && (
@@ -112,7 +118,7 @@ export default function WorkspaceSelectorModal({ onClose }: WorkspaceSelectorMod
                     </div>
 
                     {/* Arrow */}
-                    <div className="flex-shrink-0 text-gray-400 group-hover:text-blue-400 transition-colors">
+                    <div className="flex-shrink-0 text-gray-400 group-hover:text-white transition-colors">
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
@@ -127,7 +133,7 @@ export default function WorkspaceSelectorModal({ onClose }: WorkspaceSelectorMod
           <div className="p-6 border-t border-gray-700 bg-gray-900/50">
             <button
               onClick={() => setShowCreateModal(true)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-lg hover:shadow-blue-500/50"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white text-black hover:bg-gray-200 rounded-lg font-medium transition-colors shadow-lg hover:shadow-white/20"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

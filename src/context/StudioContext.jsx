@@ -39,6 +39,7 @@ const useStudioStore = create(
     helpModalOpen: false,
     nogViewerOpen: false,
     publishPanelModalOpen: false,
+    workspaceSelectorModalOpen: false,
 
     // === Settings State ===
     theme: 'dark', // 'dark' | 'light'
@@ -184,6 +185,10 @@ const useStudioStore = create(
     // === Publish Panel Modal Actions ===
     openPublishPanelModal: () => set({ publishPanelModalOpen: true }),
     closePublishPanelModal: () => set({ publishPanelModalOpen: false }),
+
+    // === Workspace Selector Modal Actions ===
+    openWorkspaceSelectorModal: () => set({ workspaceSelectorModalOpen: true }),
+    closeWorkspaceSelectorModal: () => set({ workspaceSelectorModalOpen: false }),
 
     setTheme: (theme) => {
       set({ theme });

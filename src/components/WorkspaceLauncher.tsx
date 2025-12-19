@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { motion } from 'framer-motion';
 import WorkspaceSelectorModal from './WorkspaceSelectorModal';
+import Background from './Background';
 
 export default function WorkspaceLauncher() {
   const { createWorkspace, openWorkspace } = useWorkspace();
@@ -39,12 +40,9 @@ export default function WorkspaceLauncher() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900">
-      {/* GraphStudio Animation Background - you can integrate Three.js animation here */}
-      <div className="absolute inset-0 z-0">
-        {/* TODO: Add Three.js animation or background pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20" />
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#050505] overflow-hidden relative">
+      {/* GraphStudio Animation Background */}
+      <Background />
 
       {/* Main Content */}
       <div className="relative z-10 text-center px-4">
@@ -74,7 +72,7 @@ export default function WorkspaceLauncher() {
         >
           <button
             onClick={handleOpenWorkspace}
-            className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-blue-500/50"
+            className="group relative px-8 py-4 bg-white text-black hover:bg-gray-200 rounded-lg font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-white/20"
           >
             <span className="flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -87,7 +85,7 @@ export default function WorkspaceLauncher() {
           <button
             onClick={handleBuildFromScratch}
             disabled={isCreating}
-            className="group relative px-8 py-4 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white rounded-lg font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-gray-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="group relative px-8 py-4 bg-gray-800 text-white hover:bg-gray-700 border border-gray-700 rounded-lg font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-white/10 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             <span className="flex items-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

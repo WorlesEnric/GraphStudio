@@ -702,6 +702,20 @@ export class NexusClient {
   }
 
   /**
+   * Deactivate a workspace (cleanup runtime resources)
+   */
+  async deactivateWorkspace(workspaceId: string): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/api/workspaces/${workspaceId}/deactivate`, {
+      method: 'POST',
+      headers: this.createHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to deactivate workspace: ${response.statusText}`);
+    }
+  }
+
+  /**
    * Update workspace details
    */
   async updateWorkspace(

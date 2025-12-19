@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Layout, Plus, Settings, HelpCircle, Sparkles, User as UserIcon, LogOut, CreditCard, Network, Upload } from 'lucide-react';
+import { Layout, Plus, Settings, HelpCircle, Sparkles, User as UserIcon, LogOut, CreditCard, Network, Upload, ArrowLeftRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useWorkspace } from '../context/WorkspaceContext';
 import useStudioStore from '../context/StudioContext';
 import { getPanelDefinition } from '../panels/registry';
 
@@ -19,10 +20,12 @@ export default function Sidebar() {
     openSettingsModal,
     openHelpModal,
     openNOGViewer,
-    openPublishPanelModal
+    openPublishPanelModal,
+    openWorkspaceSelectorModal
   } = useStudioStore();
 
   const { user, logout } = useAuth();
+  const { currentWorkspace } = useWorkspace();
 
   const [hoveredPanel, setHoveredPanel] = useState(null);
 
@@ -50,19 +53,14 @@ export default function Sidebar() {
       };
     }
 
-    const color = panelDef?.accentColor || 'violet';
-
-    const colors = {
-      violet: { bg: 'bg-violet-500', ring: 'ring-violet-500', glow: 'shadow-violet-500/30' },
-      cyan: { bg: 'bg-cyan-500', ring: 'ring-cyan-500', glow: 'shadow-cyan-500/30' },
-      amber: { bg: 'bg-amber-500', ring: 'ring-amber-500', glow: 'shadow-amber-500/30' },
-      green: { bg: 'bg-green-500', ring: 'ring-green-500', glow: 'shadow-green-500/30' },
-      blue: { bg: 'bg-blue-500', ring: 'ring-blue-500', glow: 'shadow-blue-500/30' },
-      emerald: { bg: 'bg-emerald-500', ring: 'ring-emerald-500', glow: 'shadow-emerald-500/30' },
-      pink: { bg: 'bg-pink-500', ring: 'ring-pink-500', glow: 'shadow-pink-500/30' },
+    // Monochrome accent (no color variations)
+    const panelAccent = {
+      bg: 'bg-white',
+      ring: 'ring-white',
+      glow: 'shadow-white/20'
     };
 
-    return colors[color] || colors.violet;
+    return panelAccent;
   };
 
   return (
@@ -82,6 +80,25 @@ export default function Sidebar() {
 
       {/* Divider */}
       <div className="w-8 h-px bg-zinc-800 mb-4" />
+
+      {/* Workspace Switcher */}
+      {currentWorkspace && (
+        <div className="w-full mb-4">
+          <button
+            onClick={openWorkspaceSelectorModal}
+            className="w-12 h-12 mx-auto rounded-full bg-gray-800 hover:bg-gray-700 border border-gray-700 flex items-center justify-center transition-all duration-200 relative group"
+            title="Switch Workspace"
+          >
+            <ArrowLeftRight size={18} className="text-gray-400 group-hover:text-white" />
+
+            {/* Tooltip */}
+            <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-white text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-xl z-50">
+              <div className="font-medium">{currentWorkspace.name}</div>
+              <div className="text-zinc-500 text-[10px] mt-0.5">Click to switch workspace</div>
+            </div>
+          </button>
+        </div>
+      )}
 
       {/* Panel Icons */}
       <div className="flex-1 flex flex-col items-center gap-3 overflow-y-auto hide-scrollbar w-full">
@@ -174,7 +191,7 @@ export default function Sidebar() {
       <div className="flex flex-col items-center gap-2 mt-4 pt-4 border-t border-white/5">
         {/* User Profile */}
         <div className="relative group">
-          <button className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg shadow-purple-500/20">
+          <button className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white font-bold shadow-lg shadow-white/10">
             {user?.full_name?.[0]?.toUpperCase() || 'U'}
           </button>
 
@@ -183,7 +200,7 @@ export default function Sidebar() {
             <div className="px-3 py-2 border-b border-zinc-800 mb-1">
               <div className="text-sm font-medium text-white truncate">{user?.full_name || 'User'}</div>
               <div className="text-xs text-zinc-500 truncate">{user?.email}</div>
-              <div className="text-[10px] text-blue-400 mt-1 uppercase tracking-wider font-bold">{user?.subscription?.plan_name || 'FREE'}</div>
+              <div className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider font-bold">{user?.subscription?.plan_name || 'FREE'}</div>
             </div>
             <Link to="/pricing" className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors">
               <CreditCard size={14} />

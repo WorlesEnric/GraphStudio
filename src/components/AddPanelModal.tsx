@@ -47,7 +47,7 @@ function InstalledPanelCard({
 
         {/* Name and info */}
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-white group-hover:text-violet-400 transition-colors truncate">
+          <h3 className="font-medium text-white group-hover:text-gray-300 transition-colors truncate">
             {panel.name}
           </h3>
           <p className="text-xs text-zinc-500 capitalize">{panel.category}</p>
@@ -58,10 +58,10 @@ function InstalledPanelCard({
         <span
           className={`px-2 py-0.5 rounded text-xs font-medium flex-shrink-0 ${
             panel.type === 'nexus'
-              ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
+              ? 'bg-gray-700 text-gray-300 border border-gray-600'
               : panel.type === 'paid'
-              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-              : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+              ? 'bg-gray-700 text-gray-300 border border-gray-600'
+              : 'bg-gray-700 text-gray-300 border border-gray-600'
           }`}
         >
           {panel.type}
@@ -76,7 +76,7 @@ function InstalledPanelCard({
         {/* Stats */}
         <div className="flex items-center gap-3 text-xs text-zinc-500">
           <span className="flex items-center gap-1">
-            <Star size={12} className="text-amber-500" />
+            <Star size={12} className="text-gray-400" />
             {panel.averageRating?.toFixed(1) || 'N/A'}
           </span>
           <span className="flex items-center gap-1">
@@ -88,7 +88,7 @@ function InstalledPanelCard({
         {/* Add button */}
         <button
           onClick={onAdd}
-          className="px-4 py-1.5 rounded-lg bg-violet-500 hover:bg-violet-600 text-white text-sm font-medium transition-colors flex items-center gap-1.5"
+          className="px-4 py-1.5 rounded-lg bg-white text-black hover:bg-gray-200 text-sm font-medium transition-colors flex items-center gap-1.5"
         >
           <Plus size={14} />
           Add to Workspace
@@ -154,7 +154,7 @@ export function AddPanelModal() {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+        className="fixed inset-0 bg-black/20 backdrop-blur-[1px] z-40"
         onClick={closeAddPanelModal}
       />
 
@@ -181,7 +181,7 @@ export function AddPanelModal() {
               onClick={() => setActiveTab('installed')}
               className={`px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
                 activeTab === 'installed'
-                  ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
+                  ? 'bg-gray-700 text-gray-300 border border-gray-600'
                   : 'text-zinc-400 hover:text-white hover:bg-white/5'
               }`}
             >
@@ -192,7 +192,7 @@ export function AddPanelModal() {
               onClick={() => setActiveTab('marketplace')}
               className={`px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
                 activeTab === 'marketplace'
-                  ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
+                  ? 'bg-gray-700 text-gray-300 border border-gray-600'
                   : 'text-zinc-400 hover:text-white hover:bg-white/5'
               }`}
             >
@@ -208,7 +208,7 @@ export function AddPanelModal() {
                 {isLoading ? (
                   <div className="flex items-center justify-center h-full">
                     <div className="text-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500 mx-auto mb-4" />
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4" />
                       <p className="text-sm text-zinc-400">Loading panels...</p>
                     </div>
                   </div>
@@ -219,7 +219,7 @@ export function AddPanelModal() {
                       <p className="text-sm text-zinc-500">{error.message}</p>
                       <button
                         onClick={refresh}
-                        className="mt-4 px-4 py-2 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 text-violet-400 text-sm font-medium transition-colors"
+                        className="mt-4 px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium transition-colors"
                       >
                         Retry
                       </button>
@@ -235,7 +235,7 @@ export function AddPanelModal() {
                       </p>
                       <button
                         onClick={() => setActiveTab('marketplace')}
-                        className="px-4 py-2 rounded-lg bg-violet-500/20 hover:bg-violet-500/30 text-violet-400 text-sm font-medium transition-colors inline-flex items-center gap-2"
+                        className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium transition-colors inline-flex items-center gap-2"
                       >
                         <ShoppingBag size={16} />
                         Go to Marketplace
