@@ -195,7 +195,13 @@ function ButtonComponent({ label, onClick, disabled, variant = 'primary', childr
   );
 }
 
-function InputComponent({ value, onChange, placeholder, type = 'text', multiline, rows = 3, className, ...props }: any) {
+function InputComponent({ value, onChange, placeholder, type = 'text', multiline, rows = 3, className, children, ...props }: any) {
+  // Ensure value is always defined (controlled component)
+  const controlledValue = value !== undefined && value !== null ? String(value) : '';
+
+  // Extract style and exclude it from props spread to avoid duplication
+  const { style: _, ...restProps } = props;
+
   const inputStyle = {
     padding: '0.5rem',
     borderRadius: '0.375rem',
@@ -210,13 +216,13 @@ function InputComponent({ value, onChange, placeholder, type = 'text', multiline
   if (multiline === 'true' || multiline === true) {
     return (
       <textarea
-        value={value || ''}
+        value={controlledValue}
         onChange={(e) => onChange?.(e.target.value)}
         placeholder={placeholder}
         rows={rows}
         className={className}
         style={inputStyle}
-        {...props}
+        {...restProps}
       />
     );
   }
@@ -224,12 +230,12 @@ function InputComponent({ value, onChange, placeholder, type = 'text', multiline
   return (
     <input
       type={type}
-      value={value || ''}
+      value={controlledValue}
       onChange={(e) => onChange?.(e.target.value)}
       placeholder={placeholder}
       className={className}
       style={inputStyle}
-      {...props}
+      {...restProps}
     />
   );
 }
@@ -265,6 +271,53 @@ function ListItemComponent({ children, ...props }: any) {
       {children}
     </li>
   );
+}
+
+// ===== Helper Functions =====
+
+/**
+ * Parse default value from string based on type
+ */
+function parseDefaultValue(defaultValue: any, type: string): any {
+  // If already not a string, return as-is
+  if (typeof defaultValue !== 'string') {
+    return defaultValue;
+  }
+
+  // Handle empty string
+  if (defaultValue === '') {
+    return '';
+  }
+
+  try {
+    switch (type) {
+      case 'string':
+        return defaultValue;
+
+      case 'number':
+        return Number(defaultValue);
+
+      case 'boolean':
+        return defaultValue === 'true' || defaultValue === '1';
+
+      case 'array':
+      case 'list':
+      case 'object':
+        // Try to parse as JSON
+        return JSON.parse(defaultValue);
+
+      default:
+        // Try JSON parse for complex types, fall back to string
+        try {
+          return JSON.parse(defaultValue);
+        } catch {
+          return defaultValue;
+        }
+    }
+  } catch (error) {
+    console.error(`[NXMLRenderer] Failed to parse default value "${defaultValue}" as type "${type}":`, error);
+    return defaultValue;
+  }
 }
 
 // ===== Main Renderer Component =====
@@ -315,10 +368,10 @@ export function NXMLRenderer({
         const astData = await response.json();
         setAst(astData);
 
-        // Initialize state from AST
+        // Initialize state from AST with proper type parsing
         const initialState: Record<string, any> = {};
         for (const stateDef of astData.data.states) {
-          initialState[stateDef.name] = stateDef.default;
+          initialState[stateDef.name] = parseDefaultValue(stateDef.default, stateDef.type);
         }
         setState(initialState);
       } catch (err) {
@@ -464,15 +517,23 @@ export function NXMLRenderer({
 
   /**
    * Resolve prop value (handle bindings like {$state.count})
+   * Also evaluates JavaScript expressions in curly braces
    */
   const resolvePropValue = useCallback(
-    (value: any): any => {
+    (value: any, scope: Record<string, any> = {}): any => {
       if (typeof value === 'string') {
-        // Check for state binding: {$state.variableName}
-        const match = value.match(/^\{\$state\.(\w+)\}$/);
-        if (match) {
-          const varName = match[1];
-          return state[varName];
+        // Check for expressions in curly braces: {...}
+        const exprMatch = value.match(/^\{(.+)\}$/s);
+        if (exprMatch) {
+          const expr = exprMatch[1];
+          try {
+            // Create a function that evaluates the expression with $state and $scope in context
+            const func = new Function('$state', '$scope', `return (${expr});`);
+            return func(state, scope);
+          } catch (error) {
+            console.error('[NXMLRenderer] Failed to evaluate expression:', expr, error);
+            return undefined;
+          }
         }
       }
 
@@ -485,14 +546,14 @@ export function NXMLRenderer({
    * Recursively render view node
    */
   const renderNode = useCallback(
-    (node: ViewNode, index: number = 0): React.ReactNode => {
+    (node: ViewNode, index: number = 0, scope: Record<string, any> = {}): React.ReactNode => {
       // Handle control flow components
       if (node.type === 'If') {
         const condition = node.props?.condition;
         if (condition) {
-          const result = resolvePropValue(condition);
+          const result = resolvePropValue(condition, scope);
           if (result) {
-            return node.children?.map((child, idx) => renderNode(child, idx)) || null;
+            return node.children?.map((child, idx) => renderNode(child, idx, scope)) || null;
           }
         }
         return null;
@@ -503,15 +564,14 @@ export function NXMLRenderer({
         const as = node.props?.as || 'item';
 
         if (over) {
-          const items = resolvePropValue(over);
+          const items = resolvePropValue(over, scope);
           if (Array.isArray(items)) {
             return items.map((item, itemIndex) => {
               // Create a new scope with the iteration variable
-              // Note: This is a simplified implementation
-              // A full implementation would need proper scope management
+              const childScope = { ...scope, [as]: item };
               return (
                 <React.Fragment key={itemIndex}>
-                  {node.children?.map((child, idx) => renderNode(child, idx))}
+                  {node.children?.map((child, idx) => renderNode(child, idx, childScope))}
                 </React.Fragment>
               );
             });
@@ -535,7 +595,9 @@ export function NXMLRenderer({
           // Handle bind prop for Input components
           if (key === 'bind' && typeof value === 'string' && value.startsWith('$state.')) {
             const varName = value.replace('$state.', '');
-            resolvedProps.value = state[varName];
+            const stateValue = state[varName];
+            // Always provide a controlled value - never undefined
+            resolvedProps.value = stateValue !== undefined ? stateValue : '';
             resolvedProps.onChange = (newValue: any) => {
               setState((prev) => ({ ...prev, [varName]: newValue }));
             };
@@ -545,7 +607,7 @@ export function NXMLRenderer({
             const toolName = value;
             const argsExpr = node.props?.args;
             resolvedProps.onClick = () => {
-              const args = argsExpr ? resolvePropValue(argsExpr) : {};
+              const args = argsExpr ? resolvePropValue(argsExpr, scope) : {};
               callTool(toolName, args);
             };
           }
@@ -554,13 +616,18 @@ export function NXMLRenderer({
             resolvedProps[key] = () => executeHandler(value);
           } else {
             // Resolve bindings
-            resolvedProps[key] = resolvePropValue(value);
+            resolvedProps[key] = resolvePropValue(value, scope);
           }
         }
       }
 
+      // For Input components, ensure value is always set (controlled component)
+      if (node.type === 'Input' && !('value' in resolvedProps)) {
+        resolvedProps.value = '';
+      }
+
       // Render children
-      const children = node.children?.map((child, idx) => renderNode(child, idx)) || null;
+      const children = node.children?.map((child, idx) => renderNode(child, idx, scope)) || null;
 
       return (
         <Component key={index} {...resolvedProps}>
